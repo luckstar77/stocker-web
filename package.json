@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "presite": "cd functions && npm install",
-    "start": "cross-env APP_TYPE=site umi dev",
+    "start": "node server.js",
+    "dev": "cross-env APP_TYPE=site umi dev",
     "start:no-mock": "cross-env MOCK=none umi dev",
     "build": "umi build",
     "site": "npm run presite && cross-env APP_TYPE=site npm run build && firebase deploy && npm run docker:push",
@@ -39,6 +40,7 @@
     "classnames": "^2.2.6",
     "dva": "^2.4.1",
     "enquire-js": "^0.2.1",
+    "express": "^4.16.4",
     "hash.js": "^1.1.7",
     "lodash": "^4.17.11",
     "lodash-decorators": "^6.0.1",
