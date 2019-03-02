@@ -678,6 +678,7 @@ class TableList extends PureComponent {
                       )}
                     </div>
                     <StandardTable
+                      rowKey={'symbol'}
                       selectedRows={selectedRows}
                       loading={loading}
                       data={{list:stocks}}
