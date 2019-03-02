@@ -6,7 +6,7 @@
   "scripts": {
     "presite": "cd functions && npm install",
     "start": "node server.js",
-    "heroku-postbuild": "npm install && npm run dev",
+    "heroku-postbuild": "npm install && npm run build",
     "dev": "cross-env APP_TYPE=site umi dev",
     "start:no-mock": "cross-env MOCK=none umi dev",
     "build": "umi build",
