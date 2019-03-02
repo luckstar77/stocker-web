@@ -39,6 +39,39 @@ const getValue = obj =>
 const statusMap = ['default', 'processing', 'success', 'error'];
 const status = ['关闭', '运行中', '已上线', '异常'];
 
+import ApolloClient from "apollo-boost";
+const apolloClient = new ApolloClient({
+  // GraphQL 服务器地址
+  uri: process.env.APOLLO_CLIENT || "http://localhost:7001/graphql"
+});
+import { Query, ApolloProvider } from 'react-apollo'
+import gql from 'graphql-tag'
+
+const GET_STOCKS = gql`
+  query {
+    stocks {
+      symbol
+      company
+      price
+      dividend
+      dividendCount
+      dividendSuccessCount
+      dividendSuccessPercent
+      dividends {
+        date
+        dividend
+        priceOfLastDay
+        openingPrice
+        yield
+        per
+        pbr
+        success
+        successDay
+      }
+    }
+  }
+`
+
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
   const okHandle = () => {
@@ -291,62 +324,34 @@ class TableList extends PureComponent {
 
   columns = [
     {
-      title: '规则名称',
-      dataIndex: 'name',
-      render: text => <a onClick={() => this.previewItem(text)}>{text}</a>,
+      title: '代號',
+      dataIndex: 'symbol',
     },
     {
-      title: '描述',
-      dataIndex: 'desc',
+      title: '公司',
+      dataIndex: 'company',
     },
     {
-      title: '服务调用次数',
-      dataIndex: 'callNo',
-      sorter: true,
-      render: val => `${val} 万`,
-      // mark to display a total number
-      needTotal: true,
+      title: '股價',
+      dataIndex: 'price',
     },
     {
-      title: '状态',
-      dataIndex: 'status',
-      filters: [
-        {
-          text: status[0],
-          value: 0,
-        },
-        {
-          text: status[1],
-          value: 1,
-        },
-        {
-          text: status[2],
-          value: 2,
-        },
-        {
-          text: status[3],
-          value: 3,
-        },
-      ],
-      render(val) {
-        return <Badge status={statusMap[val]} text={status[val]} />;
-      },
+      title: '殖利率',
+      dataIndex: 'dividend',
+      render: val => val ? `${val}%` : '',
     },
     {
-      title: '上次调度时间',
-      dataIndex: 'updatedAt',
-      sorter: true,
-      render: val => <span>{moment(val).format('YYYY-MM-DD HH:mm:ss')}</span>,
+      title: '填權息次數',
+      dataIndex: 'dividendCount',
     },
     {
-      title: '操作',
-      render: (text, record) => (
-        <Fragment>
-          <a onClick={() => this.handleUpdateModalVisible(true, record)}>配置</a>
-          <Divider type="vertical" />
-          <a href="">订阅警报</a>
-        </Fragment>
-      ),
+      title: '填權息成功次數',
+      dataIndex: 'dividendSuccessCount',
+    },
+    {
+      title: '填權息成功率',
+      dataIndex: 'dividendSuccessPercent',
+      render: val => val ? `${val}%` : '',
     },
   ];
 
@@ -646,44 +651,55 @@ class TableList extends PureComponent {
       handleUpdate: this.handleUpdate,
     };
     return (
-      <PageHeaderWrapper title="查询表格">
-        <Card bordered={false}>
-          <div className={styles.tableList}>
-            <div className={styles.tableListForm}>{this.renderForm()}</div>
-            <div className={styles.tableListOperator}>
-              <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
-                新建
-              </Button>
-              {selectedRows.length > 0 && (
-                <span>
-                  <Button>批量操作</Button>
-                  <Dropdown overlay={menu}>
-                    <Button>
-                      更多操作 <Icon type="down" />
-                    </Button>
-                  </Dropdown>
-                </span>
-              )}
-            </div>
-            <StandardTable
-              selectedRows={selectedRows}
-              loading={loading}
-              data={data}
-              columns={this.columns}
-              onSelectRow={this.handleSelectRows}
-              onChange={this.handleStandardTableChange}
-            />
-          </div>
-        </Card>
-        <CreateForm {...parentMethods} modalVisible={modalVisible} />
-        {stepFormValues && Object.keys(stepFormValues).length ? (
-          <UpdateForm
-            {...updateMethods}
-            updateModalVisible={updateModalVisible}
-            values={stepFormValues}
-          />
-        ) : null}
-      </PageHeaderWrapper>
+      <ApolloProvider client={apolloClient}>
+        <Query
+          query={GET_STOCKS}
+        >
+          {({ loading, data: {stocks}, error }) => {
+            console.log(stocks);
+            return (
+              <PageHeaderWrapper title="查询表格">
+                <Card bordered={false}>
+                  <div className={styles.tableList}>
+                    <div className={styles.tableListForm}>{this.renderForm()}</div>
+                    <div className={styles.tableListOperator}>
+                      <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
+                        新建
+                      </Button>
+                      {selectedRows.length > 0 && (
+                        <span>
+                          <Button>批量操作</Button>
+                          <Dropdown overlay={menu}>
+                            <Button>
+                              更多操作 <Icon type="down" />
+                            </Button>
+                          </Dropdown>
+                        </span>
+                      )}
+                    </div>
+                    <StandardTable
+                      selectedRows={selectedRows}
+                      loading={loading}
+                      data={{list:stocks}}
+                      columns={this.columns}
+                      onSelectRow={this.handleSelectRows}
+                      onChange={this.handleStandardTableChange}
+                    />
+                  </div>
+                </Card>
+                <CreateForm {...parentMethods} modalVisible={modalVisible} />
+                {stepFormValues && Object.keys(stepFormValues).length ? (
+                  <UpdateForm
+                    {...updateMethods}
+                    updateModalVisible={updateModalVisible}
+                    values={stepFormValues}
+                  />
+                ) : null}
+              </PageHeaderWrapper>
+            )
+          }}
+        </Query>
+      </ApolloProvider>
     );
   }
 }
