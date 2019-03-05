@@ -25,7 +25,7 @@ export default class GlobalHeader extends PureComponent {
   render() {
     const { collapsed, isMobile, logo } = this.props;
     return (
-      <div className={styles.header}>
+      <div className={styles.header} style={{display:'none'}}>
         {isMobile && (
           <Link to="/" className={styles.logo} key="logo">
             <img src={logo} alt="logo" width="32" />

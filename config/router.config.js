@@ -22,12 +22,12 @@ export default [
     routes: [
       // list
       {
-        path: '/list',
+        path: '/',
         icon: 'table',
         name: 'list',
         routes: [
           {
-            path: '/list/table-list',
+            path: '/',
             name: 'searchtable',
             component: './List/TableList',
           },

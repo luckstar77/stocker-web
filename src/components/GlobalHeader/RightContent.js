@@ -122,7 +122,7 @@ export default class GlobalHeaderRight extends PureComponent {
       className = `${styles.right}  ${styles.dark}`;
     }
     return (
-      <div className={className}>
+      <div className={className} style={{display:'none'}}>
         <HeaderSearch
           className={`${styles.action} ${styles.search}`}
           placeholder={formatMessage({ id: 'component.globalHeader.search' })}

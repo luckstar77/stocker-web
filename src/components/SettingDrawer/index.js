@@ -137,7 +137,7 @@ class SettingDrawer extends PureComponent {
         onClose={this.togglerContent}
         placement="right"
         handler={
-          <div className={styles.handle} onClick={this.togglerContent}>
+          <div className={styles.handle} onClick={this.togglerContent} style={{display:'none'}}>
             <Icon
               type={collapse ? 'close' : 'setting'}
               style={{

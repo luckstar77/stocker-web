@@ -1,6 +1,7 @@
 import React, { PureComponent, Fragment } from 'react';
 import { connect } from 'dva';
 import moment from 'moment';
+import _ from 'lodash';
 import router from 'umi/router';
 import {
   Row,
@@ -518,11 +519,11 @@ class TableList extends PureComponent {
       <Form onSubmit={this.handleSearch} layout="inline">
         <Row gutter={{ md: 8, lg: 24, xl: 48 }}>
           <Col md={8} sm={24}>
-            <FormItem label="规则名称">
-              {getFieldDecorator('name')(<Input placeholder="请输入" />)}
+            <FormItem label="查詢股票">
+              {getFieldDecorator('name')(<Input placeholder="請輸入代號或者公司" />)}
             </FormItem>
           </Col>
-          <Col md={8} sm={24}>
+          <Col md={8} sm={24} style={{display:'none'}}>
             <FormItem label="使用状态">
               {getFieldDecorator('status')(
                 <Select placeholder="请选择" style={{ width: '100%' }}>
@@ -535,12 +536,12 @@ class TableList extends PureComponent {
           <Col md={8} sm={24}>
             <span className={styles.submitButtons}>
               <Button type="primary" htmlType="submit">
-                查询
+                查詢
               </Button>
-              <Button style={{ marginLeft: 8 }} onClick={this.handleFormReset}>
+              <Button style={{ marginLeft: 8, display:'none' }} onClick={this.handleFormReset}>
                 重置
               </Button>
-              <a style={{ marginLeft: 8 }} onClick={this.toggleForm}>
+              <a style={{ marginLeft: 8, display:'none' }} onClick={this.toggleForm}>
                 展开 <Icon type="down" />
               </a>
             </span>
@@ -634,7 +635,7 @@ class TableList extends PureComponent {
       rule: { data },
       loading,
     } = this.props;
-    const { selectedRows, modalVisible, updateModalVisible, stepFormValues } = this.state;
+    const { selectedRows, modalVisible, updateModalVisible, stepFormValues, formValues: {name=''} } = this.state;
     const menu = (
       <Menu onClick={this.handleMenuClick} selectedKeys={[]}>
         <Menu.Item key="remove">删除</Menu.Item>
@@ -650,20 +651,22 @@ class TableList extends PureComponent {
       handleUpdateModalVisible: this.handleUpdateModalVisible,
       handleUpdate: this.handleUpdate,
     };
+
     return (
       <ApolloProvider client={apolloClient}>
         <Query
           query={GET_STOCKS}
         >
           {({ loading, data: {stocks}, error }) => {
-            console.log(stocks);
+            const stock = _.orderBy(_.filter(stocks, function(o) { return (o.symbol && o.symbol.includes(name)) || (o.company && o.company.includes(name)); }), ['symbol'], ['asc']);
+
             return (
-              <PageHeaderWrapper title="查询表格">
+              <PageHeaderWrapper title="查詢權息">
                 <Card bordered={false}>
                   <div className={styles.tableList}>
                     <div className={styles.tableListForm}>{this.renderForm()}</div>
                     <div className={styles.tableListOperator}>
-                      <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)}>
+                      <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)} style={{display:'none'}}>
                         新建
                       </Button>
                       {selectedRows.length > 0 && (
@@ -681,7 +684,8 @@ class TableList extends PureComponent {
                       rowKey={'symbol'}
                       selectedRows={selectedRows}
                       loading={loading}
-                      data={{list:stocks}}
+                      data={{list:stock ? stock : []}}
+                      // data={{list:name ? stocks : stocks}}
                       columns={this.columns}
                       onSelectRow={this.handleSelectRows}
                       onChange={this.handleStandardTableChange}

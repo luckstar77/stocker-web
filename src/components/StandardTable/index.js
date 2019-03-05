@@ -82,7 +82,7 @@ class StandardTable extends PureComponent {
 
     return (
       <div className={styles.standardTable}>
-        <div className={styles.tableAlert}>
+        <div className={styles.tableAlert} style={{display:'none'}}>
           <Alert
             message={
               <Fragment>
@@ -106,8 +106,8 @@ class StandardTable extends PureComponent {
           />
         </div>
         <Table
-          rowKey={rowKey || 'key'}
-          rowSelection={rowSelection}
+          // rowKey={rowKey || 'key'}
+          // rowSelection={rowSelection}
           dataSource={list}
           pagination={paginationProps}
           onChange={this.handleTableChange}
