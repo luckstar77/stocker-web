@@ -55,6 +55,7 @@ const GET_STOCKS = gql`
       company
       price
       dividend
+      dividendAvg
       dividendCount
       dividendSuccessCount
       dividendSuccessPercent
@@ -342,7 +343,12 @@ class TableList extends PureComponent {
       render: val => val ? `${val}%` : '',
     },
     {
-      title: '填權息次數',
+      title: '歷年平均殖利率',
+      dataIndex: 'dividendAvg',
+      render: val => val ? `${val.toFixed(2)}%` : '',
+    },
+    {
+      title: '除權息次數',
       dataIndex: 'dividendCount',
     },
     {
