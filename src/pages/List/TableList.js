@@ -48,30 +48,30 @@ const apolloClient = new ApolloClient({
 import { Query, ApolloProvider } from 'react-apollo'
 import gql from 'graphql-tag'
 
-const GET_STOCKS = gql`
-  query {
-    stocks {
-      symbol
-      company
-      price
+const GET_STOCK = search => gql`
+query {
+  stock(search:"${search}") {
+    symbol
+    company
+    price
+    dividend
+    dividendAvg
+    dividendCount
+    dividendSuccessCount
+    dividendSuccessPercent
+    dividends {
+      date
       dividend
-      dividendAvg
-      dividendCount
-      dividendSuccessCount
-      dividendSuccessPercent
-      dividends {
-        date
-        dividend
-        priceOfLastDay
-        openingPrice
-        yield
-        per
-        pbr
-        success
-        successDay
-      }
+      priceOfLastDay
+      openingPrice
+      yield
+      per
+      pbr
+      success
+      successDay
     }
   }
+}
 `
 
 const CreateForm = Form.create()(props => {
@@ -660,13 +660,7 @@ class TableList extends PureComponent {
 
     return (
       <ApolloProvider client={apolloClient}>
-        <Query
-          query={GET_STOCKS}
-        >
-          {({ loading, data: {stocks}, error }) => {
-            const stock = _.orderBy(_.filter(stocks, function(o) { return (o.symbol && o.symbol.includes(name)) || (o.company && o.company.includes(name)); }), ['symbol'], ['asc']);
-
-            return (
+        
               <PageHeaderWrapper title="查詢權息">
                 <Card bordered={false}>
                   <div className={styles.tableList}>
@@ -686,16 +680,38 @@ class TableList extends PureComponent {
                         </span>
                       )}
                     </div>
-                    <StandardTable
-                      rowKey={'symbol'}
-                      selectedRows={selectedRows}
-                      loading={loading}
-                      data={{list:stock ? stock : []}}
-                      // data={{list:name ? stocks : stocks}}
-                      columns={this.columns}
-                      onSelectRow={this.handleSelectRows}
-                      onChange={this.handleStandardTableChange}
-                    />
+                    {
+                      name ? (<Query
+                        query={GET_STOCK(name)}
+                      >
+                        {({ loading, data: {stock}, error }) => {
+                          return (
+                            <StandardTable
+                              rowKey={'symbol'}
+                              selectedRows={selectedRows}
+                              loading={loading}
+                              data={{list:stock ? stock : []}}
+                              // data={{list:name ? stocks : stocks}}
+                              columns={this.columns}
+                              onSelectRow={this.handleSelectRows}
+                              onChange={this.handleStandardTableChange}
+                            />
+                            )
+                          }}
+                      </Query>) : (
+                          <StandardTable
+                            rowKey={'symbol'}
+                            selectedRows={selectedRows}
+                            loading={loading}
+                            data={[]}
+                            // data={{list:name ? stocks : stocks}}
+                            columns={this.columns}
+                            onSelectRow={this.handleSelectRows}
+                            onChange={this.handleStandardTableChange}
+                          />
+                        )
+                    }
+                    
                   </div>
                 </Card>
                 <CreateForm {...parentMethods} modalVisible={modalVisible} />
@@ -707,9 +723,6 @@ class TableList extends PureComponent {
                   />
                 ) : null}
               </PageHeaderWrapper>
-            )
-          }}
-        </Query>
       </ApolloProvider>
     );
   }
