@@ -519,7 +519,7 @@ class TableList extends PureComponent {
 
   renderSimpleForm() {
     const {
-      form: { getFieldDecorator },
+      form: { getFieldDecorator, getFieldsValue },
     } = this.props;
     return (
       <Form onSubmit={this.handleSearch} layout="inline">
@@ -541,7 +541,12 @@ class TableList extends PureComponent {
           </Col>
           <Col md={8} sm={24}>
             <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit">
+              <Button type="primary" htmlType="submit" onClick={()=>{
+                 gtq('track', {
+                  actionName: 'stock',
+                  actionValue: getFieldsValue().name,
+                });
+              }}>
                 查詢
               </Button>
               <Button style={{ marginLeft: 8, display:'none' }} onClick={this.handleFormReset}>
