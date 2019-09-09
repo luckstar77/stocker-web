@@ -43,7 +43,7 @@ const status = ['关闭', '运行中', '已上线', '异常'];
 import ApolloClient from "apollo-boost";
 const apolloClient = new ApolloClient({
   // GraphQL 服务器地址
-  uri: process.env.APOLLO_CLIENT || "https://stocker-server.herokuapp.com/graphql"
+  uri: process.env.APOLLO_CLIENT || "http://54.238.144.96:7001/graphql"
 });
 import { Query, ApolloProvider } from 'react-apollo'
 import gql from 'graphql-tag'
