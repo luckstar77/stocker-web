@@ -40,13 +40,13 @@ const getValue = obj =>
 const statusMap = ['default', 'processing', 'success', 'error'];
 const status = ['关闭', '运行中', '已上线', '异常'];
 
-import ApolloClient from "apollo-boost";
+import ApolloClient from 'apollo-boost';
 const apolloClient = new ApolloClient({
   // GraphQL 服务器地址
-  uri: process.env.APOLLO_CLIENT || "http://54.238.144.96:7001/graphql"
+  uri: process.env.APOLLO_CLIENT || 'http://stocker.imallenlai.com:7002/graphql',
 });
-import { Query, ApolloProvider } from 'react-apollo'
-import gql from 'graphql-tag'
+import { Query, ApolloProvider } from 'react-apollo';
+import gql from 'graphql-tag';
 
 const GET_STOCK = search => gql`
 query {
@@ -72,7 +72,7 @@ query {
     }
   }
 }
-`
+`;
 
 const CreateForm = Form.create()(props => {
   const { modalVisible, form, handleAdd, handleModalVisible } = props;
@@ -340,12 +340,12 @@ class TableList extends PureComponent {
     {
       title: '殖利率',
       dataIndex: 'dividend',
-      render: val => val ? `${val}%` : '',
+      render: val => (val ? `${val}%` : ''),
     },
     {
       title: '歷年平均殖利率',
       dataIndex: 'dividendAvg',
-      render: val => val ? `${val.toFixed(2)}%` : '',
+      render: val => (val ? `${val.toFixed(2)}%` : ''),
     },
     {
       title: '除權息次數',
@@ -358,7 +358,7 @@ class TableList extends PureComponent {
     {
       title: '填權息成功率',
       dataIndex: 'dividendSuccessPercent',
-      render: val => val ? `${val}%` : '',
+      render: val => (val ? `${val}%` : ''),
     },
   ];
 
@@ -529,7 +529,7 @@ class TableList extends PureComponent {
               {getFieldDecorator('name')(<Input placeholder="請輸入代號或者公司" />)}
             </FormItem>
           </Col>
-          <Col md={8} sm={24} style={{display:'none'}}>
+          <Col md={8} sm={24} style={{ display: 'none' }}>
             <FormItem label="使用状态">
               {getFieldDecorator('status')(
                 <Select placeholder="请选择" style={{ width: '100%' }}>
@@ -541,18 +541,22 @@ class TableList extends PureComponent {
           </Col>
           <Col md={8} sm={24}>
             <span className={styles.submitButtons}>
-              <Button type="primary" htmlType="submit" onClick={()=>{
-                 gtq('track', {
-                  actionName: 'stock',
-                  actionValue: getFieldsValue().name,
-                });
-              }}>
+              <Button
+                type="primary"
+                htmlType="submit"
+                onClick={() => {
+                  gtq('track', {
+                    actionName: 'stock',
+                    actionValue: getFieldsValue().name,
+                  });
+                }}
+              >
                 查詢
               </Button>
-              <Button style={{ marginLeft: 8, display:'none' }} onClick={this.handleFormReset}>
+              <Button style={{ marginLeft: 8, display: 'none' }} onClick={this.handleFormReset}>
                 重置
               </Button>
-              <a style={{ marginLeft: 8, display:'none' }} onClick={this.toggleForm}>
+              <a style={{ marginLeft: 8, display: 'none' }} onClick={this.toggleForm}>
                 展开 <Icon type="down" />
               </a>
             </span>
@@ -646,7 +650,13 @@ class TableList extends PureComponent {
       rule: { data },
       loading,
     } = this.props;
-    const { selectedRows, modalVisible, updateModalVisible, stepFormValues, formValues: {name=''} } = this.state;
+    const {
+      selectedRows,
+      modalVisible,
+      updateModalVisible,
+      stepFormValues,
+      formValues: { name = '' },
+    } = this.state;
     const menu = (
       <Menu onClick={this.handleMenuClick} selectedKeys={[]}>
         <Menu.Item key="remove">删除</Menu.Item>
@@ -665,69 +675,70 @@ class TableList extends PureComponent {
 
     return (
       <ApolloProvider client={apolloClient}>
-        
-              <PageHeaderWrapper title="查詢權息">
-                <Card bordered={false}>
-                  <div className={styles.tableList}>
-                    <div className={styles.tableListForm}>{this.renderForm()}</div>
-                    <div className={styles.tableListOperator}>
-                      <Button icon="plus" type="primary" onClick={() => this.handleModalVisible(true)} style={{display:'none'}}>
-                        新建
+        <PageHeaderWrapper title="查詢權息">
+          <Card bordered={false}>
+            <div className={styles.tableList}>
+              <div className={styles.tableListForm}>{this.renderForm()}</div>
+              <div className={styles.tableListOperator}>
+                <Button
+                  icon="plus"
+                  type="primary"
+                  onClick={() => this.handleModalVisible(true)}
+                  style={{ display: 'none' }}
+                >
+                  新建
+                </Button>
+                {selectedRows.length > 0 && (
+                  <span>
+                    <Button>批量操作</Button>
+                    <Dropdown overlay={menu}>
+                      <Button>
+                        更多操作 <Icon type="down" />
                       </Button>
-                      {selectedRows.length > 0 && (
-                        <span>
-                          <Button>批量操作</Button>
-                          <Dropdown overlay={menu}>
-                            <Button>
-                              更多操作 <Icon type="down" />
-                            </Button>
-                          </Dropdown>
-                        </span>
-                      )}
-                    </div>
-                    {
-                      name ? (<Query
-                        query={GET_STOCK(name)}
-                      >
-                        {({ loading, data: {stock}, error }) => {
-                          return (
-                            <StandardTable
-                              rowKey={'symbol'}
-                              selectedRows={selectedRows}
-                              loading={loading}
-                              data={{list:stock ? stock : []}}
-                              // data={{list:name ? stocks : stocks}}
-                              columns={this.columns}
-                              onSelectRow={this.handleSelectRows}
-                              onChange={this.handleStandardTableChange}
-                            />
-                            )
-                          }}
-                      </Query>) : (
-                          <StandardTable
-                            rowKey={'symbol'}
-                            selectedRows={selectedRows}
-                            loading={loading}
-                            data={[]}
-                            // data={{list:name ? stocks : stocks}}
-                            columns={this.columns}
-                            onSelectRow={this.handleSelectRows}
-                            onChange={this.handleStandardTableChange}
-                          />
-                        )
-                    }
-                    
-                  </div>
-                </Card>
-                <CreateForm {...parentMethods} modalVisible={modalVisible} />
-                {stepFormValues && Object.keys(stepFormValues).length ? (
-                  <UpdateForm
-                    {...updateMethods}
-                    updateModalVisible={updateModalVisible}
-                    values={stepFormValues}
-                  />
-                ) : null}
-              </PageHeaderWrapper>
+                    </Dropdown>
+                  </span>
+                )}
+              </div>
+              {name ? (
+                <Query query={GET_STOCK(name)}>
+                  {({ loading, data: { stock }, error }) => {
+                    return (
+                      <StandardTable
+                        rowKey={'symbol'}
+                        selectedRows={selectedRows}
+                        loading={loading}
+                        data={{ list: stock ? stock : [] }}
+                        // data={{list:name ? stocks : stocks}}
+                        columns={this.columns}
+                        onSelectRow={this.handleSelectRows}
+                        onChange={this.handleStandardTableChange}
+                      />
+                    );
+                  }}
+                </Query>
+              ) : (
+                <StandardTable
+                  rowKey={'symbol'}
+                  selectedRows={selectedRows}
+                  loading={loading}
+                  data={[]}
+                  // data={{list:name ? stocks : stocks}}
+                  columns={this.columns}
+                  onSelectRow={this.handleSelectRows}
+                  onChange={this.handleStandardTableChange}
+                />
+              )}
+            </div>
+          </Card>
+          <CreateForm {...parentMethods} modalVisible={modalVisible} />
+          {stepFormValues && Object.keys(stepFormValues).length ? (
+            <UpdateForm
+              {...updateMethods}
+              updateModalVisible={updateModalVisible}
+              values={stepFormValues}
+            />
+          ) : null}
+        </PageHeaderWrapper>
       </ApolloProvider>
     );
   }
